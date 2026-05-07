@@ -93,23 +93,6 @@ If direct path install is more appropriate for this repo layout, use:
 hermes skills install materializepath/hermes-public-skills/skills/agent-wol
 ```
 
-## Publishing command
-
-The intended official Hermes Skills Hub publish command is:
-
-```bash
-hermes skills publish skills/agent-wol --to github --repo materializepath/hermes-public-skills
-```
-
-Do not run that command until the skill has been sanitized, scanned, reviewed, and explicitly approved for release.
-
-## Security notes
-
-- Keep real MAC addresses, LAN addresses, VPN addresses, and hostnames out of public repos.
-- Store private target values in private Hermes configuration, local shell environment variables, or another private secret/config mechanism.
-- Do not commit `.env`, `config.yaml`, `auth.json`, logs, sessions, keys, tokens, or credential files.
-- Run gitleaks before publishing.
-
 ## Troubleshooting
 
 - If packets send but the machine does not wake, check firmware WOL settings, NIC standby power, and OS power settings.
