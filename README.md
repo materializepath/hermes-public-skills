@@ -31,7 +31,7 @@ Add this repository as a Hermes skills tap:
 
 ```bash
 hermes skills tap add materializepath/hermes-public-skills
-hermes skills search agent-wol
+hermes skills search agent-wol --source github
 hermes skills install materializepath/hermes-public-skills/skills/agent-wol
 ```
 
