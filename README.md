@@ -2,6 +2,11 @@
 
 Public Hermes skill for safe, generic Wake-on-LAN workflows.
 
+I originally created this because I did not want my local LLM, 3090 GPU system running 24/7.
+So if that system was going to sleep, I needed a way to remotely wake it, to use local LLMs, or to use my graphics/cuda focued agent on that system.
+
+Now with this skill, I simply message my main agent in Discord, "wake up Agent Hawk!", or any of my other agents, which triggeres their system to wake from a sleep or hibernate state.
+
 Author: p.a.t.h. @materializepath
 License: MIT
 
