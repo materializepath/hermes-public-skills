@@ -25,29 +25,6 @@ hermes-public-skills/
         └── SKILL.md
 ```
 
-## Install from this repository
-
-Add this repository as a Hermes skills tap:
-
-```bash
-hermes skills tap add materializepath/hermes-public-skills
-hermes skills search agent-wol --source github
-hermes skills install materializepath/hermes-public-skills/skills/agent-wol
-```
-
-You can also inspect the skill directly:
-
-```bash
-hermes skills inspect materializepath/hermes-public-skills/skills/agent-wol
-```
-
-## Notes for contributors
-
-- Keep each skill self-contained under `skills/<skill-name>/`.
-- Public skill examples should use placeholders instead of private machine details.
-- Do not commit secrets, local config, logs, sessions, or credentials.
-- This repository runs gitleaks on pushes and pull requests.
-
 ## License
 
 Skills in this repository are published under the MIT License unless a specific skill says otherwise.
