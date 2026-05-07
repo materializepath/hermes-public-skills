@@ -7,12 +7,13 @@ License: MIT
 
 ## What it does
 
-`agent-wol` helps a Hermes agent wake a known machine by sending Wake-on-LAN magic packets with user-provided values. It also provides a careful verification and troubleshooting sequence so users can tell the difference between packet delivery, network reachability, and actual machine wake state.
+`agent-wol` helps a Hermes agent wake a known machine by sending Wake-on-LAN magic packets with user-provided values. It can also guide users through safe discovery of the target adapter MAC address and the sender LAN broadcast address. The skill keeps verification and troubleshooting separate so users can tell the difference between packet delivery, network reachability, and actual machine wake state.
 
 ## What it does not do
 
 - It does not include any real hostnames, IP addresses, MAC addresses, usernames, tokens, or local paths.
-- It does not scan networks for unknown devices.
+- It does not broad-scan networks for unknown devices.
+- It does not inventory networks without permission.
 - It does not bypass network permissions.
 - It does not publish or store credentials.
 - It does not guarantee wake success if firmware, operating-system, or NIC power settings block WOL.
@@ -22,8 +23,8 @@ License: MIT
 - Hermes Agent installed.
 - A sender machine on a network path that can reach the target LAN broadcast address.
 - The target machine's Wake-on-LAN support enabled in firmware and operating-system power settings.
-- The target network adapter MAC address.
-- A broadcast address for the target LAN.
+- The target network adapter MAC address, or permission to help discover it while the target is awake.
+- A broadcast address for the target LAN, or the sender LAN interface details needed to calculate it.
 
 ## Environment variables
 
@@ -42,6 +43,23 @@ The skill frontmatter defines optional Hermes configuration prompts for:
 - `agent_wol.verify_host`
 
 Use placeholders in public examples and your own real values only in your private Hermes config or runtime environment.
+
+## Discovery help
+
+If a user does not know the MAC address or broadcast address yet, ask Hermes:
+
+```text
+Use agent-wol to help me discover the MAC address and broadcast address for <TARGET_NAME>. I know the target host as <TARGET_HOST> and my sender interface is <INTERFACE_NAME>.
+```
+
+The skill uses narrow, permission-based checks:
+
+- read adapter addresses on the target machine if the target is awake
+- query ARP or neighbor tables for a known target host
+- read the sender interface broadcast value from the OS
+- calculate a broadcast address from `<LAN_IP>/<PREFIX_LENGTH>` when supplied
+
+It should not broad-scan an unknown network by default.
 
 ## Usage examples
 
@@ -95,7 +113,8 @@ Do not run that command until the skill has been sanitized, scanned, reviewed, a
 ## Troubleshooting
 
 - If packets send but the machine does not wake, check firmware WOL settings, NIC standby power, and OS power settings.
-- If the broadcast send fails, send from a machine on the correct LAN segment.
+- If the broadcast send fails, re-check the sender interface broadcast address or send from a machine on the correct LAN segment.
+- If the discovered MAC does not work, verify the adapter on the target machine or router while the target is awake.
 - If ping fails after wake, wait longer or test the actual service you expect to become available.
 - If ARP shows a MAC but the target does not respond, treat the ARP entry as possible stale cache.
 

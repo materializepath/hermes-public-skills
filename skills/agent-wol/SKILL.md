@@ -49,12 +49,13 @@ Wake-on-LAN is simple in concept: send a magic packet to the sleeping machine's 
 Use this skill when:
 
 - You need to wake a known desktop, workstation, server, media box, or agent host on a local network.
-- You already know the target MAC address and a broadcast address that can reach the target LAN.
-- You want to separate three things clearly: sending the magic packet, checking reachability, and diagnosing why wake did or did not work.
+- You already know the target MAC address and a broadcast address that can reach the target LAN, or you need a safe way to discover them.
+- You want to separate four things clearly: discovering target values, sending the magic packet, checking reachability, and diagnosing why wake did or did not work.
 
 Do not use this skill for:
 
 - Scanning a network to discover unknown devices.
+- Inventorying networks where you do not have permission.
 - Bypassing network access controls.
 - Waking machines on networks where you do not have permission.
 - Assuming ping alone can wake a machine. Ping is only a diagnostic check.
@@ -70,6 +71,91 @@ The user must provide these values. Public examples must use placeholders only.
 | Broadcast address | LAN broadcast address reachable from the sender | `<BROADCAST_ADDRESS>` |
 | UDP ports | WOL ports to try | `9,7` |
 | Verification host | Hostname or IP to test after wake | `<VERIFY_HOST>` |
+
+## Discovering Target Values Safely
+
+This skill can help users discover the two WOL values people most often miss:
+
+1. the target network adapter MAC address
+2. the broadcast address for the target LAN
+
+Discovery should be permission-based and narrow. Prefer asking the user for a known target hostname or IP address. Do not broad-scan a network by default.
+
+### Discover the Target MAC Address
+
+Best options, from safest to most reliable:
+
+1. Read it on the target machine while the machine is awake.
+2. Ask the router or DHCP reservation page for the known device entry.
+3. Query the sender machine's ARP or neighbor table after contacting the known target host.
+
+On the target machine itself:
+
+```bash
+# macOS / Linux: show interface hardware addresses
+ifconfig | grep -E 'ether|HWaddr' || true
+
+# Linux alternative
+ip link show || true
+```
+
+From another machine on the same LAN, when the target is awake and known:
+
+```bash
+ping -c 3 <TARGET_HOST> || true
+arp -an | grep '<TARGET_HOST>' || true
+```
+
+On Linux senders, the neighbor table may be clearer:
+
+```bash
+ping -c 3 <TARGET_HOST> || true
+ip neigh show | grep '<TARGET_HOST>' || true
+```
+
+Interpretation:
+
+- Use the MAC address for the wired or Wi-Fi adapter that remains powered for WOL.
+- A laptop may have different MAC addresses for Ethernet, Wi-Fi, USB Ethernet, and docks.
+- Some Wi-Fi networks use private or randomized MAC addresses; those may not work for WOL.
+- ARP and neighbor entries can be stale. Treat them as candidates until verified.
+
+### Discover the Broadcast Address
+
+The broadcast address depends on the sender's LAN interface and subnet mask. It is usually shown by the OS, router, or can be calculated from a LAN IP plus prefix length.
+
+macOS:
+
+```bash
+ifconfig <INTERFACE_NAME> | grep 'broadcast' || true
+```
+
+Linux:
+
+```bash
+ip -o -4 addr show dev <INTERFACE_NAME> || true
+```
+
+If the user knows the LAN IP and prefix length, calculate the broadcast address without hardcoding any private values:
+
+```bash
+python3 - <LAN_IP> <PREFIX_LENGTH> <<'PY'
+import ipaddress
+import sys
+
+if len(sys.argv) != 3:
+    sys.exit('usage: python3 - <LAN_IP> <PREFIX_LENGTH>')
+
+network = ipaddress.ip_network(f'{sys.argv[1]}/{sys.argv[2]}', strict=False)
+print(network.broadcast_address)
+PY
+```
+
+Guidance:
+
+- Prefer the subnet broadcast for the sender's active LAN interface.
+- Avoid global broadcast unless the user knows their OS and network allow it.
+- If the sender is not on the target LAN, send the magic packet from an always-on host, router, or automation node on that LAN.
 
 ## Safety Rules
 
@@ -89,16 +175,19 @@ The user must provide these values. Public examples must use placeholders only.
    - UDP ports
    - verification host
 
-2. Send a small burst of magic packets to each configured UDP port.
+2. If the MAC address or broadcast address is missing, help the user discover only those values using the narrow discovery steps above.
 
-3. Wait briefly for the system to resume.
+3. Send a small burst of magic packets to each configured UDP port.
 
-4. Verify reachability using safe checks:
+4. Wait briefly for the system to resume.
+
+5. Verify reachability using safe checks:
    - ping the verification host
    - inspect ARP or neighbor table if useful
    - optionally test SSH, HTTP, or another service only if the user requests it
 
-5. Report the result clearly:
+6. Report the result clearly:
+   - discovered candidate MAC or broadcast values, using placeholders in public docs
    - packets sent or failed
    - verification replies or timeouts
    - whether a MAC mapping was visible
@@ -181,7 +270,9 @@ Interpretation:
 | Symptom | Likely cause | Next step |
 | --- | --- | --- |
 | Magic packet sends but host never responds | Target is fully powered off or WOL is disabled | Check firmware and OS power settings locally |
-| Broadcast send fails | Sender cannot route to that broadcast address | Use a LAN host or router on the correct subnet |
+| Broadcast send fails | Sender cannot route to that broadcast address | Re-check the sender interface broadcast or use a LAN host/router on the correct subnet |
+| Discovered MAC does not work | Wrong adapter, stale ARP entry, randomized MAC, or NIC lacks standby power | Verify on the target machine or router while the target is awake |
+| Broadcast is unknown | Sender interface or subnet is unclear | Use OS interface commands or calculate from `<LAN_IP>/<PREFIX_LENGTH>` |
 | Ping fails but device later wakes | Resume is delayed or ping is blocked | Wait longer and test the intended service |
 | ARP shows a MAC but ping fails | ARP cache may be stale | Do not treat ARP alone as proof the target is awake |
 | Works from one machine but not another | Broadcast path differs | Send from an always-on host on the target LAN |
@@ -200,8 +291,9 @@ Before publishing a host-specific variant of this skill:
 ## Verification Checklist
 
 - [ ] Target MAC address is supplied by the user, not hardcoded in the public skill.
-- [ ] Broadcast address is supplied by the user, not hardcoded in the public skill.
+- [ ] Broadcast address is supplied by the user, discovered locally, or calculated from user-provided LAN values; it is not hardcoded in the public skill.
 - [ ] Verification host is supplied by the user, not hardcoded in the public skill.
+- [ ] Discovery steps are narrow and permission-based; they do not broad-scan unknown networks by default.
 - [ ] No private IPs, VPN IPs, MAC addresses, usernames, or local paths are present.
 - [ ] WOL packet sender validates inputs and limits retries.
 - [ ] Verification steps are non-destructive.
