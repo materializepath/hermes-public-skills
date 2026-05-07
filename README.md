@@ -1,111 +1,53 @@
-# agent-WOL
+# Hermes Public Skills
 
-Public Hermes skill for safe, generic Wake-on-LAN workflows.
+Public, sanitized Hermes skills by p.a.t.h. @materializepath.
 
-I originally created this because I did not want my local LLM, 3090 GPU system running 24/7.
-So if that system was going to sleep, I needed a way to remotely wake it, to use local LLMs, or to use my graphics/cuda focued agent on that system.
+This repository is a small collection of reusable Hermes Agent skills. Each skill lives in its own folder under `skills/` and includes a `SKILL.md` file for Hermes plus optional supporting docs.
 
-Now with this skill, I simply message my main agent in Discord, "wake up Agent Hawk!", or any of my other agents, which triggeres their system to wake from a sleep or hibernate state.
+## Available skills
 
-Author: p.a.t.h. @materializepath
-License: MIT
+| Skill | Description | Path |
+| --- | --- | --- |
+| `agent-wol` | Wake a known machine or agent host with Wake-on-LAN, including safe discovery of the target MAC address and LAN broadcast address. | `skills/agent-wol/` |
 
-## What it does
-
-`agent-wol` helps a Hermes agent wake a known machine by sending Wake-on-LAN magic packets with user-provided values. It can also guide users through safe discovery of the target adapter MAC address and the sender LAN broadcast address. The skill keeps verification and troubleshooting separate so users can tell the difference between packet delivery, network reachability, and actual machine wake state.
-
-## What it does not do
-
-- It does not include any real hostnames, IP addresses, MAC addresses, usernames, tokens, or local paths.
-- It does not broad-scan networks for unknown devices.
-- It does not inventory networks without permission.
-- It does not bypass network permissions.
-- It does not publish or store credentials.
-- It does not guarantee wake success if firmware, operating-system, or NIC power settings block WOL.
-
-## Requirements
-
-- Hermes Agent installed.
-- A sender machine on a network path that can reach the target LAN broadcast address.
-- The target machine's Wake-on-LAN support enabled in firmware and operating-system power settings.
-- The target network adapter MAC address, or permission to help discover it while the target is awake.
-- A broadcast address for the target LAN, or the sender LAN interface details needed to calculate it.
-
-## Environment variables
-
-No secret environment variables are required.
-
-The example sender in `skills/agent-wol/SKILL.md` uses command-line placeholders rather than environment variables, so users can keep private machine details in their own notes, private Hermes config, or shell history policy as they prefer.
-
-## Configuration values
-
-The skill frontmatter defines optional Hermes configuration prompts for:
-
-- `agent_wol.target_name`
-- `agent_wol.mac_address`
-- `agent_wol.broadcast_address`
-- `agent_wol.ports`
-- `agent_wol.verify_host`
-
-Use placeholders in public examples and your own real values only in your private Hermes config or runtime environment.
-
-## Discovery help
-
-If a user does not know the MAC address or broadcast address yet, ask Hermes:
+## Repository layout
 
 ```text
-Use agent-wol to help me discover the MAC address and broadcast address for <TARGET_NAME>. I know the target host as <TARGET_HOST> and my sender interface is <INTERFACE_NAME>.
+hermes-public-skills/
+├── README.md
+├── .gitignore
+├── .github/
+│   └── workflows/
+│       └── gitleaks.yml
+└── skills/
+    └── agent-wol/
+        ├── README.md
+        └── SKILL.md
 ```
 
-The skill uses narrow, permission-based checks:
+## Install from this repository
 
-- read adapter addresses on the target machine if the target is awake
-- query ARP or neighbor tables for a known target host
-- read the sender interface broadcast value from the OS
-- calculate a broadcast address from `<LAN_IP>/<PREFIX_LENGTH>` when supplied
-
-It should not broad-scan an unknown network by default.
-
-## Usage examples
-
-Ask Hermes:
-
-```text
-Use agent-wol to wake <TARGET_NAME> using MAC <MAC_ADDRESS>, broadcast <BROADCAST_ADDRESS>, ports 9 and 7, then verify <VERIFY_HOST>.
-```
-
-Manual sender example:
-
-```bash
-python3 - <MAC_ADDRESS> <BROADCAST_ADDRESS> 9,7 3 <<'PY'
-# Use the complete sender from skills/agent-wol/SKILL.md.
-PY
-```
-
-## Installation
-
-After this repo is published as a Hermes skill source, users can add it as a tap:
+Add this repository as a Hermes skills tap:
 
 ```bash
 hermes skills tap add materializepath/hermes-public-skills
 hermes skills search agent-wol
-hermes skills install materializepath/hermes-public-skills/agent-wol
-```
-
-If direct path install is more appropriate for this repo layout, use:
-
-```bash
 hermes skills install materializepath/hermes-public-skills/skills/agent-wol
 ```
 
-## Troubleshooting
+You can also inspect the skill directly:
 
-- If packets send but the machine does not wake, check firmware WOL settings, NIC standby power, and OS power settings.
-- If the broadcast send fails, re-check the sender interface broadcast address or send from a machine on the correct LAN segment.
-- If the discovered MAC does not work, verify the adapter on the target machine or router while the target is awake.
-- If ping fails after wake, wait longer or test the actual service you expect to become available.
-- If ARP shows a MAC but the target does not respond, treat the ARP entry as possible stale cache.
+```bash
+hermes skills inspect materializepath/hermes-public-skills/skills/agent-wol
+```
+
+## Notes for contributors
+
+- Keep each skill self-contained under `skills/<skill-name>/`.
+- Public skill examples should use placeholders instead of private machine details.
+- Do not commit secrets, local config, logs, sessions, or credentials.
+- This repository runs gitleaks on pushes and pull requests.
 
 ## License
 
-MIT
+Skills in this repository are published under the MIT License unless a specific skill says otherwise.
