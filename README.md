@@ -8,7 +8,7 @@ This repository is a small collection of reusable Hermes Agent skills. Each skil
 
 | Skill | Description | Path |
 | --- | --- | --- |
-| - [`agent-wol`](./skills/agent-wol) | Wake a known machine or agent host with Wake-on-LAN, including safe discovery of the target MAC address and LAN broadcast address. | `skills/agent-wol/` |
+| [`agent-wol`](./skills/agent-wol) | Wake a known machine or agent host with Wake-on-LAN, including safe discovery of the target MAC address and LAN broadcast address. | `skills/agent-wol/` |
 
 ## Repository layout
 
