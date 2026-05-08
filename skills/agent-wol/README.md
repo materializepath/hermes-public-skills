@@ -9,6 +9,25 @@ With this skill, a user can message a main agent with something like: “wake up
 Author: p.a.t.h. @materializepath
 License: MIT
 
+## Installation
+
+copy and paste the URL of this repo to your Hermes agent, or:
+
+Add the repository as a Hermes skills tap:
+
+```bash
+hermes skills tap add materializepath/hermes-public-skills
+hermes skills search agent-wol --source github
+hermes skills install materializepath/hermes-public-skills/skills/agent-wol
+```
+
+You can inspect the skill directly:
+
+```bash
+hermes skills inspect materializepath/hermes-public-skills/skills/agent-wol
+```
+
+
 ## What it does
 
 `agent-wol` helps a Hermes agent wake a known machine by sending Wake-on-LAN magic packets with user-provided values. It can also guide users through safe discovery of the target adapter MAC address and the sender LAN broadcast address. The skill keeps verification and troubleshooting separate so users can tell the difference between packet delivery, network reachability, and actual machine wake state.
@@ -79,22 +98,6 @@ Manual sender example:
 python3 - <MAC_ADDRESS> <BROADCAST_ADDRESS> 9,7 3 <<'PY'
 # Use the complete sender from SKILL.md.
 PY
-```
-
-## Installation
-
-Add the repository as a Hermes skills tap:
-
-```bash
-hermes skills tap add materializepath/hermes-public-skills
-hermes skills search agent-wol --source github
-hermes skills install materializepath/hermes-public-skills/skills/agent-wol
-```
-
-You can inspect the skill directly:
-
-```bash
-hermes skills inspect materializepath/hermes-public-skills/skills/agent-wol
 ```
 
 ## Troubleshooting
