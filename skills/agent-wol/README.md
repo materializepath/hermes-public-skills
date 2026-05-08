@@ -2,9 +2,11 @@
 
 Public Hermes skill for safe, generic Wake-on-LAN workflows.
 
+https://github.com/user-attachments/assets/demo.mp4
+
 I originally created this because I did not want my local LLM / GPU workstation running 24/7. If that system was asleep, I needed a way to remotely wake it so I could use local LLMs or a graphics/CUDA-focused agent on that machine.
 
-With this skill, a user can message a main agent with something like: “wake up Agent Hawk,” and the agent can send Wake-on-LAN packets to the right machine, then verify whether it came online.
+With this skill, a user can message a main agent with something like: "wake up Agent Hawk," and the agent can send Wake-on-LAN packets to the right machine, then verify whether it came online.
 
 Author: p.a.t.h. @materializepath
 License: MIT
@@ -26,7 +28,6 @@ You can inspect the skill directly:
 ```bash
 hermes skills inspect materializepath/hermes-public-skills/skills/agent-wol
 ```
-
 
 ## What it does
 
