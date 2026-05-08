@@ -2,7 +2,7 @@
 
 Public Hermes skill for safe, generic Wake-on-LAN workflows.
 
-<video src="https://raw.githubusercontent.com/materializepath/hermes-public-skills/main/skills/agent-wol/demo.mp4" controls="true" width="100%" />
+![agent-WOL demo](./demo.gif)
 
 I originally created this because I did not want my local LLM / GPU workstation running 24/7. If that system was asleep, I needed a way to remotely wake it so I could use local LLMs or a graphics/CUDA-focused agent on that machine.
 
